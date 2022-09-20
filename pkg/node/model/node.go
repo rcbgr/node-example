@@ -1,7 +1,10 @@
 package model
 
 type NodeConfig struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Endpoint string `json:"endpoint"`
+	Username       string
+	Password       string
+	Endpoint       string
+	NftNetworkName string
+	Blockchain     string
+	Network        string
 }
