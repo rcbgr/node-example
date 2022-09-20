@@ -61,19 +61,19 @@ func NodeAdvancedApiBalanceByContract(contract, address string) (
 		return
 	}
 
-	i, success := new(big.Int).SetString(nativeAmount, 0)
+	nbalance, success := new(big.Float).SetString(nativeAmount)
 	if !success {
-		err = fmt.Errorf("Unable to convert nativeAmount to BigInt: %s", nativeAmount)
+		err = fmt.Errorf("Unable to convert nativeAmount to BigFloat: %s", nativeAmount)
 		return
 	}
 
-	x, y := new(big.Float).SetInt(i), new(big.Float).SetFloat64(math.Pow(10, float64(weiDecimals)))
-
-	z := new(big.Float).SetMode(big.ToNearestAway).Quo(x, y)
-
-	// TODO: This is off - see how the blockchain handles - handle accuracy
-	c, _ := z.Float64()
-	nativeAssets = c
+	z := new(big.Float).Quo(nbalance, big.NewFloat(math.Pow10(18)))
+	if c, accuracy := z.Float64(); accuracy != big.Exact {
+		nativeAssets = c
+	} else {
+		err = fmt.Errorf("Unable to convert nativeAmount to BigInt: %s", nativeAmount)
+		return
+	}
 
 	amount := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Amount
 	decimals := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Decimals
