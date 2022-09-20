@@ -61,20 +61,21 @@ func NodeAdvancedApiBalanceByContract(contract, address string) (
 		return
 	}
 
-	fmt.Println(nativeAmount)
+	if nativeAmount != "0x0" {
 
-	nbalance, success := new(big.Float).SetString(nativeAmount)
-	if !success {
-		err = fmt.Errorf("Unable to convert nativeAmount to BigFloat: %s", nativeAmount)
-		return
-	}
+		nbalance, success := new(big.Float).SetString(nativeAmount)
+		if !success {
+			err = fmt.Errorf("Unable to convert nativeAmount to BigFloat: %s", nativeAmount)
+			return
+		}
 
-	z := new(big.Float).Quo(nbalance, big.NewFloat(math.Pow10(18)))
-	if c, accuracy := z.Float64(); accuracy != big.Exact {
-		nativeAssets = c
-	} else {
-		err = fmt.Errorf("Unable to convert nativeAmount to BigInt: %s", nativeAmount)
-		return
+		z := new(big.Float).Quo(nbalance, big.NewFloat(math.Pow10(18)))
+		if c, accuracy := z.Float64(); accuracy != big.Exact {
+			nativeAssets = c
+		} else {
+			err = fmt.Errorf("Unable to convert nativeAmount to float64: %s", nativeAmount)
+			return
+		}
 	}
 
 	amount := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Amount
