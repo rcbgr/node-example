@@ -61,6 +61,8 @@ func NodeAdvancedApiBalanceByContract(contract, address string) (
 		return
 	}
 
+	fmt.Println(nativeAmount)
+
 	nbalance, success := new(big.Float).SetString(nativeAmount)
 	if !success {
 		err = fmt.Errorf("Unable to convert nativeAmount to BigFloat: %s", nativeAmount)
