@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/rcbgr/node-example/pkg/node"
 )
@@ -10,7 +12,7 @@ func main() {
 
 	usdcContract := "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
 
-	contract := "0x60e4d786628fea6478f785a6d7e704777c86a7c6"
+	contract := "0x60e4d786628fea6478f785a6d7e704777c86a7c6" // Mutant Ape Yacht Club: MAYC Token
 
 	tokens, err := node.NodeNftApiTokensByContract(contract)
 	if err != nil {
@@ -33,6 +35,13 @@ func main() {
 
 	fmt.Println(fmt.Sprintf("Owner addresses: %d", len(owners)))
 
+	f, err := os.Create("balances.csv")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w := bufio.NewWriter(f)
+
 	for _, owner := range owners {
 
 		v, err := node.NodeAdvancedApiBalanceByContract(usdcContract, owner)
@@ -40,8 +49,11 @@ func main() {
 			fmt.Println(err)
 		}
 
-		fmt.Println(fmt.Sprintf("USDC balance: %f", v))
+		w.WriteString(fmt.Sprintf("%s,%f\n", owner, v))
 
+		fmt.Println(fmt.Sprintf("USDC balance: %f", v))
 	}
 
+	w.Flush()
+	f.Close()
 }
