@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"math/big"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,7 +17,15 @@ import (
 	"github.com/rcbgr/node-example/pkg/node/model"
 )
 
-func NodeAdvancedApiBalanceByContract(contract, address string) (float64, error) {
+const (
+	weiDecimals = uint(18)
+)
+
+func NodeAdvancedApiBalanceByContract(contract, address string) (
+	contractAssets,
+	nativeAssets float64,
+	err error,
+) {
 
 	req := &model.NodeAdvancedApiRequest{
 		Config: config.NodeConfig,
@@ -38,20 +47,45 @@ func NodeAdvancedApiBalanceByContract(contract, address string) (float64, error)
 		},
 	}
 
-	res, err := NodeAdvancedApiCall(req)
-	if err != nil {
-		return 0.0, fmt.Errorf("Failed to call coinbaseCloud_getSingleBalance: %v", err)
+	res, e := NodeAdvancedApiCall(req)
+	if e != nil {
+		err = fmt.Errorf("Failed to call coinbaseCloud_getSingleBalance: %v", err)
+		return
 	}
+
+	nativeAmount := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).NativeAmount
+	nativeUnit := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).NativeUnit
+
+	if nativeUnit != "Wei" {
+		err = fmt.Errorf("Only know how to decode ETH + Wei - received:: %s", nativeUnit)
+		return
+	}
+
+	i, success := new(big.Int).SetString(nativeAmount, 0)
+	if !success {
+		err = fmt.Errorf("Unable to convert nativeAmount to BigInt: %s", nativeAmount)
+		return
+	}
+
+	x, y := new(big.Float).SetInt(i), new(big.Float).SetFloat64(math.Pow(10, float64(weiDecimals)))
+
+	z := new(big.Float).SetMode(big.ToNearestAway).Quo(x, y)
+
+	// TODO: This is off - see how the blockchain handles - handle accuracy
+	c, _ := z.Float64()
+	nativeAssets = c
 
 	amount := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Amount
 	decimals := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Decimals
 
-	v, err := strconv.ParseInt(amount, 0, 64)
-	if err != nil {
-		return 0.0, fmt.Errorf("Unable to decode amount: %v", err)
+	v, e := strconv.ParseInt(amount, 0, 64)
+	if e != nil {
+		err = fmt.Errorf("Unable to decode amount: %v", err)
+		return
 	}
+	contractAssets = float64(v) / math.Pow(10, float64(decimals))
 
-	return float64(v) / math.Pow(10, float64(decimals)), nil
+	return
 }
 
 func NodeAdvancedApiCall(req *model.NodeAdvancedApiRequest) (*model.NodeAdvancedApiResponse, error) {
