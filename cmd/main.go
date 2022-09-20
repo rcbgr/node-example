@@ -44,14 +44,25 @@ func main() {
 
 	for _, owner := range owners {
 
-		v, err := node.NodeAdvancedApiBalanceByContract(usdcContract, owner)
+		contractAssets, nativeAssets, err := node.NodeAdvancedApiBalanceByContract(
+			usdcContract,
+			owner,
+		)
+
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		w.WriteString(fmt.Sprintf("%s,%f\n", owner, v))
+		w.WriteString(fmt.Sprintf("%s,%0.18f,%f\n", owner, nativeAssets, contractAssets))
 
-		fmt.Println(fmt.Sprintf("USDC balance: %f", v))
+		fmt.Println(
+			fmt.Sprintf(
+				"Address: %s - USDC balance: %f - native balance: %0.18f",
+				owner,
+				contractAssets,
+				nativeAssets,
+			),
+		)
 	}
 
 	w.Flush()
