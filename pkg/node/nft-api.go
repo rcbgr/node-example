@@ -26,8 +26,6 @@ func NodeNftApiTokenOwnerByContractAndToken(
 		config.NodeConfig.NftNetworkName,
 	)
 
-	fmt.Println(url)
-
 	res, err := NodeNftApiCall(
 		&model.NodeNftApiRequest{
 			Config:     config.NodeConfig,
