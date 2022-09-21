@@ -70,12 +70,10 @@ func NodeAdvancedApiBalanceByContract(contract, address string) (
 		}
 
 		z := new(big.Float).Quo(nbalance, big.NewFloat(math.Pow10(18)))
-		if c, accuracy := z.Float64(); accuracy != big.Exact {
-			nativeAssets = c
-		} else {
-			err = fmt.Errorf("Unable to convert nativeAmount to float64: %s", nativeAmount)
-			return
-		}
+
+		// It's not a great idea to convert to float64. This is to simplify
+		c, _ := z.Float64()
+		nativeAssets = c
 	}
 
 	amount := res.Result.(*model.JsonRpcResponse).Result.(*model.NodeAdvancedApiGetSingleBalanceResponse).TokenBalance.Amount
