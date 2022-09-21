@@ -67,8 +67,6 @@ func NodeNftApiTokensByContract(contractAddress string) ([]string, error) {
 			url = fmt.Sprintf("%s&cursor=%s", url, cursor)
 		}
 
-		fmt.Println(url)
-
 		res, err := NodeNftApiCall(
 			&model.NodeNftApiRequest{
 				Config:     config.NodeConfig,
