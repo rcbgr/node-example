@@ -54,7 +54,6 @@ func NodeNftApiTokensByContract(contractAddress string) ([]string, error) {
 	var tokens []string
 	var cursor string
 	var url string
-	idx := 0
 	for {
 
 		url = fmt.Sprintf(
@@ -95,12 +94,6 @@ func NodeNftApiTokensByContract(contractAddress string) ([]string, error) {
 		cursor = vals.NextPageCursor
 
 		if len(cursor) == 0 {
-			break
-		}
-
-		idx++
-
-		if idx > 5 {
 			break
 		}
 
