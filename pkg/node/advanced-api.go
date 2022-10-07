@@ -114,7 +114,7 @@ func NodeAdvancedApiCall(req *model.NodeAdvancedApiRequest) (*model.NodeAdvanced
 	)
 
 	client := http.Client{
-		Timeout: 3 * time.Second,
+		Timeout: 7 * time.Second,
 	}
 
 	res, err := client.Do(r)

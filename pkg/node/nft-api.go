@@ -26,6 +26,8 @@ func NodeNftApiTokenOwnerByContractAndToken(
 		config.NodeConfig.NftNetworkName,
 	)
 
+	fmt.Println(url)
+
 	res, err := NodeNftApiCall(
 		&model.NodeNftApiRequest{
 			Config:     config.NodeConfig,
@@ -60,6 +62,8 @@ func NodeNftApiTokensByContract(contractAddress string) ([]string, error) {
 			contractAddress,
 			config.NodeConfig.NftNetworkName,
 		)
+
+		fmt.Println(url)
 
 		if len(cursor) > 0 {
 			url = fmt.Sprintf("%s&cursor=%s", url, cursor)
